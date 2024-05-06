@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace gda_compiler
+namespace CXCompiler
 {
-    class Program
+    class CXLexer
     {
-        static void Main(string[] args)
-        {
 
-            CharDFA cdfa = new CharDFA();
+        private CharDFA cdfa;
+
+        public CXLexer()
+        {
+            this.cdfa = new CharDFA();
 
 
             CharDFA.State sta_start = cdfa.NewState("start");
@@ -135,35 +138,18 @@ namespace gda_compiler
             CharDFA.State sta_gteq = cdfa.NewState("gteq", "GTEQ");
             sta_gt.NewDelta("gt_to_gteq", "[=]", sta_gteq);
             sta_gt.NewDelta("start_to_gt", "[^=]", sta_gt_end, false, false);
-
-
-
-            List<CharDFA.Token> tokens = cdfa.ProcessFile("filename Memory", @"
-                
-                int main() {
-                    int rg:i = 0;
-                    int st:binInt = 0b1100;
-                    int st:octInt = 0o137;
-                    int st:hexInt = 0xAFFB10;
-                    for ( ; rg:i < 30; rg:i++) {
-                        printf(rg:i);
-                    }
-
-                    if (rg:i == 31) {
-                        return 1;
-                    }
-                    return 0;
-                }
-            ");
-
-            foreach (CharDFA.Token token in tokens)
-            {
-                Console.WriteLine(token.name + ": " + token.value);
-            }
-
-            Console.WriteLine("Press any key to end.");
-            Console.ReadKey();
-
         }
+
+        public List<CharDFA.Token> ProcessFile(string filename)
+        {
+            string data = File.ReadAllText(Environment.CurrentDirectory + Path.DirectorySeparatorChar + filename);
+            return cdfa.ProcessFile(filename, data);
+        }
+
+        public List<CharDFA.Token> ProcessString(string filename, string data)
+        {
+            return cdfa.ProcessFile(filename, data);
+        }
+
     }
 }

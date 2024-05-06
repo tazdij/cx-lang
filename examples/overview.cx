@@ -1,0 +1,86 @@
+/*
+	CX: C eXtended
+	
+	C eXtended, is a merger of the ideology of Pascal and C, but extended in a way
+	that is intended for the computer capabilities of today. C was written to compile
+	on minicomputers like the DEC PDP-7 and then the DEC PDP-11. There are certain
+	procedural and operational decisions which were specifically made in C and its
+	compilation to be able to run in the limited environment available at the time.
+	CX can utilize the machines of today for compilation, and the enormous RAM available
+	and the blazing fast and parallel processors.
+
+
+	Key Tenants and Objectives:
+	* cx will compile pure C code (c89, c90, c99, c11, etc)
+	* cx can simply intermix into C code
+	* a cx file can directly reference C files (.c, .h)
+	* a cx file can use the C Preprocessor (plus its own comptime)
+	* cx will compile in a C mode when C is included into a project
+	* cx will comiple in CX mode when only CS code is being used
+	* cx code can directly use any types or structs from C code without interface logic or boilerplate
+*/
+
+
+// A Standard c hello world
+
+#include <stdio.h>
+#include <string.h>
+#include <inttypes.h>
+
+int main(int argc, char *argc[]) {
+	printf("Hello World");
+}
+
+
+// A pure CX hello world
+// notice it is pretty similar to C, but has actual Array and String types, and packages with import syntax
+//	- A "dynamic" array is always a pointer to heap. But a static/sized array variable is on Stack.
+//	- A Package is a file which may reference other files, all included file's of the same `package name` will be
+//	  visible as if it were in the same file (at the package level when imported)
+package main
+
+import "stdio"
+
+int main(string[] args) {
+	printf("Hello World");
+}
+
+
+
+// A CX using C code from another file in same project
+// $ ./hello people.db
+
+import "stdio"
+
+#include "people.h" // optionally into a namespace
+
+// To namespace the file included, simply add a symbol after the file include
+// #include "people.h" ppl
+// ppl.people_init("dbfile");
+// ppl.person* user;
+// defer ppl.people_uninit();
+// ppl.people_get_admin();
+//
+
+int main(string[] args) {
+
+	people_init(args[1]);
+	defer people_uninit();
+
+	// In CX, the Pointer is defined on the type and not the variable. 
+	person* user;
+	user = people_get_admin();
+	
+	if !user {
+		printf("Error, no admin found\n");
+		return 1;
+	}
+	
+	// Pointer to Struct is auto Deref'd using "Accessor" operator [.]
+	printf("Hello Mr. Admin: %s\n", user.first_name);
+
+	return 0;
+}
+
+
+// Lets work with structs now

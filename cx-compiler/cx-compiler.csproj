@@ -7,8 +7,8 @@
     <ProjectGuid>{E66F716B-C732-4B4D-B47A-25CA36DD2219}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>gda_compiler</RootNamespace>
-    <AssemblyName>gda-compiler</AssemblyName>
+    <RootNamespace>CXCompiler</RootNamespace>
+    <AssemblyName>cx-compiler</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -41,8 +41,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CharDFA.cs" />
+    <Compile Include="CXNodeTree.cs" />
+    <Compile Include="CXLexer.cs" />
+    <Compile Include="CXParser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TokenDFA.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

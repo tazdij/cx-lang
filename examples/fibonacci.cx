@@ -1,0 +1,22 @@
+package main;
+
+import "core:math.cx";
+
+i32 fib(i32 num) {
+	if num <= 2 {
+		return 1;
+	}
+	
+	return fib(num-1) + fib(num-2);
+}
+
+
+int main(string[] args) {
+	i32 i;
+	i32 x = 17;
+	
+	for (i = 1; i <= 16; i++) {
+		x--;
+		printf("Fib %i = %n", i, fib(i));
+	}
+}

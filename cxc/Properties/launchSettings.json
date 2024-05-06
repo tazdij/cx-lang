@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "cxc": {
+      "commandName": "Project",
+      "commandLineArgs": "..\\examples\\fibonacci.cx",
+      "workingDirectory": "$(MSBuildProjectDirectory)"
+    }
+  }
+}

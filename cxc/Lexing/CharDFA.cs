@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace gda_compiler
+namespace CXCompiler.Lexing
 {
-    class CharDFA
+    internal class CharDFA
     {
         public struct Token
         {
@@ -21,13 +21,12 @@ namespace gda_compiler
         {
 
             public Regex comparator { private set; get; }
-            string name = null;
+            string name;
             public bool collect_char { private set; get; }
             public bool advance_char { private set; get; }
             public State to_state { private set; get; }
 
-            public Delta(string name, string pattern, State to_state) : this(name, pattern, to_state, true, true)
-            { }
+            public Delta(string name, string pattern, State to_state) : this(name, pattern, to_state, true, true) { }
 
             public Delta(string name, string pattern, State to_state, bool collect, bool advance)
             {
@@ -54,6 +53,9 @@ namespace gda_compiler
         {
             List<Delta> _deltas;
             string _name;
+
+            public string Name { get { return _name; } }
+
             public string _tok_id { private set; get; }
 
 
@@ -157,6 +159,15 @@ namespace gda_compiler
 
         public List<Token> ProcessFile(string filename, string fileData)
         {
+            // To make it much easier to display errors formatted, we will simply
+            //  - replace all tabs with spaces
+            //  - replace all \r\n with \n
+            //  - replace all \r with \n
+            fileData = fileData.Replace("\t", "    ");    // Maybe lets use the current buffer to check for display positioning and tabs?
+            fileData = fileData.Replace("\r\n", "\n");
+            fileData = fileData.Replace("\r", "\n");
+
+
             // TEST: Add null or ETX (03) to end of fileData
             //  This should avoid any States not completing
             fileData += (char)3;
@@ -189,7 +200,50 @@ namespace gda_compiler
                 {
                     // This might mean there is an error, as the character had no place to be processed
                     // TODO: Throw an error here?
-                    throw new Exception("Unexpected char '" + fileData[i] + "'; Expected " + _activeState.AcceptOptions());
+
+                    // We need to get the entire line to display in the exception
+                    // Split the fileData into lines
+                    string[] lines = fileData.Split('\n');
+                    string line = lines[lineNum - 1];
+                    string line_before = lines[lineNum - 2];
+                    string line_after = lines[lineNum] ?? "";
+
+                    // Get the length of the last line number
+                    int lineNumLength = (lineNum + 1).ToString().Length;
+
+
+                    // Create Padded Line Number strings for each of the three lines
+                    string line_before_num_str = (lineNum - 2).ToString().PadLeft(lineNumLength, '0');
+                    string line_num_str = (lineNum - 1).ToString().PadLeft(lineNumLength, '0');
+                    string line_after_num_str = lineNum.ToString().PadLeft(lineNumLength, '0');
+
+
+                    // Get the line up to the character
+                    string line_to_char = line.Substring(0, charNum);
+
+                    // Get the line after the character
+                    string line_after_char = line.Substring(charNum);
+
+                    // Generate a ^ at the character position left padded by spaces
+                    //  pad = Char Position + LineNumber length + 1 (for the :)
+                    string pointer = new string(' ', charNum - 1) + "^";
+
+                    // Generate the error message
+                    string error_message = $"Unexpected char '{fileData[i]}' at Position: {lineNum}, {charNum}; Expected " + _activeState.AcceptOptions();
+
+                    // Add the line to the error message
+                    error_message +=
+                          $"\n\nSyntax error in source at {lineNum}, {charNum}: \n\n"
+                        + $"{line_before_num_str}:\t{line_before}\n{line_num_str}:\t{line}\n"
+                        + $"\t{pointer}\n"
+                        + $"{line_after_num_str}:\t{line_after}\n\n";
+
+                    // Print the DFA State, to know where the lexer is in.
+                    error_message += $"Active State: {_activeState.Name}\n";
+
+
+                    //throw new Exception($"Unexpected char '{fileData[i]}' at Line {lineNum} Char {charNum}; Expected " + _activeState.AcceptOptions());
+                    throw new Exception(error_message);
                 }
                 else
                 {
