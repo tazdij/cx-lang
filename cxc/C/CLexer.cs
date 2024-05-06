@@ -183,6 +183,8 @@ namespace CXCompiler.C
             sta_octal_digits.NewDelta("octal_digits", "[0-7]", sta_octal_digits);
             sta_octal_digits.NewDelta("octal_end", "[^0-7]", sta_octal_end, false, false);
 
+            sta_int_zero_start.NewDelta("decimal_zero_start", "[\\.]", sta_decimal_from_int);
+
             // Decimal and Floating Point Number like 0?.####f? (Is this supported in C???)
             sta_dot_start.NewDelta("decimal_from_dot", "[0-9]", sta_decimal_digits);    // . to numbers
             sta_decimal_from_int.NewDelta("decimal_digits", "[0-9]", sta_decimal_digits); // int to decimal (with .####)
